@@ -2,7 +2,7 @@ import tensorflow as tf
 import keras
 import numpy as np
 import os
-
+import keras.backend as K
 
 def loader(data_path):
     """
@@ -52,6 +52,8 @@ def generate_tokens(tokenizers, data_discrete):
     data_tokenized = np.zeros((len(data_discrete), len(data_discrete[0])), dtype='int64')
 
     # tokenizing loop
+    # CAUTION: dots (.) in IP address feature cause fit_on_texts split the IP string to 4 elements
+    # do not directly feed the IP address data to this loop
     for i in xrange(len(data_discrete[0])):
         tokenizers[i].fit_on_texts(data_discrete[:, i])
         tokens = tokenizers[i].texts_to_sequences(data_discrete[:, i])
@@ -59,3 +61,11 @@ def generate_tokens(tokenizers, data_discrete):
         data_tokenized[:, i] = tokens
 
     return data_tokenized
+
+
+def expand_dims(x):
+    return K.expand_dims(x, 1)
+
+
+def expand_dims_output_shape(input_shape):
+    return (input_shape[0], 1, input_shape[1])
